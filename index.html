@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  
+  <link rel="shortcut icon" href="https://evangelinedaniel.com/project1/img/favicon.png" type="img/favicon.png" />
+
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <!-- Include Leaflet MarkerCluster CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+
+  
+  
+
+  <style>
+
+    .icons {
+      position: absolute;
+      z-index: 1000;
+      top: 6rem;
+      left: -1.3rem;
+    }
+
+    html, body {
+      height: 100vh;
+    }
+
+    #map {
+      height: 100vh;
+    }
+
+    .leaflet-popup {
+      left: -274px !important;
+    }
+
+    .leaflet-popup-content {
+      width: 520px !important;
+    }
+
+    .countryDropdown {
+      animation: slideIn 0.5s ease-in-out;
+      opacity: 0.9;
+      position: fixed;
+      margin-left: 45%;
+      z-index: 1000;
+      padding: 11px 0;
+      width: 200px;
+    }
+
+    #loaderBackground {
+      display: none;
+      background-image: radial-gradient(circle farthest-corner at center,
+          #3c4b57 0%,
+          #1c262b 100%);
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
+    .loader {
+      position: absolute;
+      top: calc(50% - 32px);
+      left: calc(50% - 32px);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      perspective: 800px;
+    }
+
+    .inner {
+      position: absolute;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .inner.one {
+      left: 0%;
+      top: 0%;
+      animation: rotate-one 1s linear infinite;
+      border-bottom: 3px solid #efeffa;
+    }
+
+    .inner.two {
+      right: 0%;
+      top: 0%;
+      animation: rotate-two 1s linear infinite;
+      border-right: 3px solid #efeffa;
+    }
+
+    .inner.three {
+      right: 0%;
+      bottom: 0%;
+      animation: rotate-three 1s linear infinite;
+      border-top: 3px solid #efeffa;
+    }
+
+    @keyframes rotate-one {
+      0% {
+        transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);
+      }
+
+      100% {
+        transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);
+      }
+    }
+
+    @keyframes rotate-two {
+      0% {
+        transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);
+      }
+
+      100% {
+        transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);
+      }
+    }
+
+    @keyframes rotate-three {
+      0% {
+        transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);
+      }
+
+      100% {
+        transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-100%);
+      }
+
+      to {
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+
+  <title>GAZETTEER</title>
+</head>
+
+<body onload="getCountryBorder()">
+  
+  <div id="loaderBackground">
+    <div id="loader" class="loader h-vh">
+      <div class="inner one"></div>
+      <div class="inner two"></div>
+      <div class="inner three"></div>
+    </div>
+  </div>
+
+  <div class="countryDropdown">
+    <select onchange="search()" class="form-control mr-sm-2" name="selectCountry" id="selectCountry" required>
+      <option value="" selected disabled hidden>
+        Select Country
+      </option>
+    </select>
+  </div>
+  
+  <div id="load">
+    <div class="float-start icons">
+      <ul style="list-style: none;">
+        <li class="mb-2"><button class="rounded border border-0" style="width: 2rem;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal1"><i class="fa fa-info"></i></button></li>
+        <li class="mb-2"><button class="rounded border border-0" style="width: 2rem;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal2"><i class="fa fa-cloud"></i></button></li>
+        <li class="mb-2"><button class="rounded border border-0" style="width: 2rem;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal3"><i class="fa fa-dollar-sign"></i></button></li>
+        <li class="mb-2"><button class="rounded border border-0" style="width: 2rem;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal4"><i class="fa fa fa-won"></i></button></li>
+        <li class="mb-2"><button class="rounded border border-0" style="width: 2rem;" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal5"><i class="fa fa-newspaper"></i></button></li>
+      </ul>
+    </div>
+    
+    <div id="map_container">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <div id="info"></div>
+  <div id="forecast"></div>
+  <div id="currency"></div>
+  <div id="wikipedia"></div>
+  <div id="news"></div>
+
+  <!--<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
+  <!--<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>-->
+  <script src="./js/index.js"></script>
+</body>
+
+</html>
